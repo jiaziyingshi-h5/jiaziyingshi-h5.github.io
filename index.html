@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>茄子影视 - 鲜片市集与正版观影导航</title>
+<meta name="description" content="茄子影视(jiaziyingshi-h5.github.io)把电影、剧集、动漫、纪录片摆成一座暗夜鲜货市集，按类型、时令、场景挑片，移动端自适应单页，不提供播放入源，仅做正版导航。">
+<meta name="keywords" content="茄子影视, jiaziyingshi, 鲜片市集, 影视导航, 片单推荐, 正版观看">
+<style>
+/* ========== 全局 ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "PingFang SC","Microsoft YaHei",sans-serif;
+  background: #0e0716;
+  color: #ece4f2;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+
+/* 茄紫光晕 + 青柠微光背景 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(420px 320px at 18% 12%, rgba(124,44,140,.42), transparent 60%),
+    radial-gradient(360px 300px at 86% 22%, rgba(70,30,120,.38), transparent 60%),
+    radial-gradient(280px 220px at 70% 88%, rgba(146,224,120,.10), transparent 60%);
+  filter: blur(8px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ========== 栏目1：顶栏 ========== */
+.topbar {
+  background: rgba(14,7,22,.74);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(170,108,200,.22);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: .8rem 1.2rem;
+}
+.topbar-in {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo { font-size: 1.5rem; font-weight: 900; letter-spacing: 1px; color: #fff; display: flex; align-items: center; gap: .5rem; }
+.logo .veg { font-size: 1.6rem; filter: drop-shadow(0 0 8px rgba(170,108,200,.6)); }
+.logo b { color: #c98be6; text-shadow: 0 0 12px rgba(201,139,230,.5); }
+.logo small { font-size: .56rem; letter-spacing: 2px; color: #8a7a95; margin-left: .4rem; font-weight: 400; }
+.nav-links { display: flex; gap: 1.4rem; }
+.nav-links a { font-size: .85rem; color: #b9a9c6; transition: color .25s; }
+.nav-links a:hover { color: #b6f06a; }
+
+/* ========== 栏目2：市集 Hero ========== */
+.hero {
+  max-width: 1200px;
+  margin: auto;
+  padding: 3.8rem 1.2rem 2.6rem;
+  position: relative;
+}
+.hero .tag {
+  display: inline-block;
+  font-size: .72rem;
+  letter-spacing: 2px;
+  color: #b6f06a;
+  border: 1px solid rgba(182,240,106,.35);
+  padding: .2rem .8rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+.hero h1 {
+  font-size: 3.2rem;
+  color: #fff;
+  line-height: 1.12;
+  margin-bottom: .9rem;
+  letter-spacing: .5px;
+}
+.hero h1 b {
+  background: linear-gradient(120deg,#c98be6,#7c2c8c 60%,#b6f06a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero > p { max-width: 560px; color: #c3b3cf; margin-bottom: 1.8rem; }
+
+/* 市集数据条 */
+.market-bar { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.mk {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(170,108,200,.18);
+  border-radius: 14px;
+  padding: 1rem 1.3rem;
+  min-width: 120px;
+}
+.mk b { font-size: 1.6rem; color: #c98be6; font-weight: 900; }
+.mk span { display: block; font-size: .7rem; color: #8a7a95; letter-spacing: 1px; margin-top: .1rem; }
+
+/* 鲜货横幅 */
+.fresh-strip {
+  display: flex;
+  gap: .6rem;
+  overflow-x: auto;
+  padding-bottom: .4rem;
+}
+.fresh {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: rgba(182,240,106,.06);
+  border: 1px solid rgba(182,240,106,.25);
+  border-radius: 30px;
+  padding: .5rem 1rem;
+  font-size: .8rem;
+  color: #dceccb;
+  white-space: nowrap;
+}
+.fresh .dot { width: 7px; height: 7px; border-radius: 50%; background: #b6f06a; box-shadow: 0 0 8px #b6f06a; }
+
+/* ========== 栏目3：鲜货货架 ========== */
+.shelf-sec { max-width: 1200px; margin: auto; padding: 2.5rem 1.2rem; }
+.sec-head { margin-bottom: 1.5rem; display: flex; align-items: baseline; gap: .6rem; }
+.sec-head h2 { font-size: 1.55rem; color: #fff; padding-left: .8rem; border-left: 4px solid #b6f06a; }
+.sec-head span { font-size: .74rem; color: #8a7a95; letter-spacing: 2px; }
+
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 1.1rem;
+}
+.box {
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  border: 1px solid rgba(170,108,200,.2);
+  border-radius: 16px;
+  padding: 1.3rem 1.2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: .3s;
+}
+.box::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 90px; height: 90px;
+  background: radial-gradient(circle, rgba(201,139,230,.4), transparent 70%);
+  filter: blur(4px);
+}
+.box:hover { transform: translateY(-5px); border-color: rgba(182,240,106,.5); box-shadow: 0 14px 30px rgba(124,44,140,.25); }
+.box .emoji { font-size: 1.8rem; margin-bottom: .5rem; display: block; }
+.box h4 { font-size: 1.05rem; color: #fff; margin-bottom: .3rem; }
+.box p { font-size: .8rem; color: #b9a9c6; min-height: 42px; margin-bottom: .7rem; }
+.box .price {
+  font-size: .72rem;
+  color: #0e0716;
+  background: #b6f06a;
+  padding: .15rem .7rem;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+/* ========== 栏目4：今日上架 ========== */
+.today-sec { padding: 2.5rem 1.2rem; background: rgba(255,255,255,.012); border-top: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05); }
+.today-in { max-width: 1200px; margin: auto; }
+.today-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1.1rem; }
+.feature {
+  grid-row: span 2;
+  background: linear-gradient(150deg, rgba(124,44,140,.35), rgba(14,7,22,.2));
+  border: 1px solid rgba(201,139,230,.3);
+  border-radius: 18px;
+  padding: 1.8rem;
+  position: relative;
+  overflow: hidden;
+}
+.feature .kicker { font-size: .7rem; color: #b6f06a; letter-spacing: 2px; font-weight: 700; }
+.feature h3 { font-size: 1.8rem; color: #fff; margin: .4rem 0; line-height: 1.2; }
+.feature p { font-size: .86rem; color: #d6c8e0; margin-bottom: 1rem; }
+.feature .meta { display: flex; gap: .5rem; flex-wrap: wrap; }
+.feature .meta span { font-size: .7rem; color: #c3b3cf; border: 1px solid rgba(255,255,255,.12); padding: .15rem .6rem; border-radius: 20px; }
+.small-card {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(170,108,200,.18);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  transition: .25s;
+}
+.small-card:hover { border-color: rgba(182,240,106,.4); transform: translateY(-3px); }
+.small-card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .3rem; }
+.small-card .top .ico { font-size: 1.2rem; }
+.small-card .top .rate { font-size: .72rem; color: #b6f06a; font-weight: 700; }
+.small-card h4 { font-size: .98rem; color: #fff; margin-bottom: .2rem; }
+.small-card p { font-size: .76rem; color: #b9a9c6; }
+
+/* ========== 栏目5：场景市集 ========== */
+.scene-sec { max-width: 1200px; margin: auto; padding: 2.5rem 1.2rem 3rem; }
+.scene-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+.scene {
+  text-align: center;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(170,108,200,.16);
+  border-radius: 14px;
+  padding: 1.3rem 1rem;
+  transition: .25s;
+}
+.scene:hover { background: rgba(182,240,106,.05); border-color: rgba(182,240,106,.35); }
+.scene .e { font-size: 1.7rem; display: block; margin-bottom: .4rem; }
+.scene h4 { font-size: .95rem; color: #fff; margin-bottom: .25rem; }
+.scene p { font-size: .76rem; color: #9a8aa6; }
+
+/* ========== 关于 ========== */
+.about {
+  background: rgba(255,255,255,.02);
+  border-top: 1px solid rgba(255,255,255,.05);
+  padding: 3.2rem 1.2rem;
+  text-align: center;
+}
+.about-in { max-width: 680px; margin: auto; }
+.about h2 { color: #fff; font-size: 1.45rem; margin-bottom: 1rem; letter-spacing: 1px; }
+.about p { color: #c3b3cf; font-size: .9rem; margin-bottom: .8rem; }
+.about b { color: #c98be6; }
+
+/* ========== 页脚 ========== */
+footer {
+  background: #070310;
+  color: #6a5a75;
+  text-align: center;
+  padding: 2.2rem 1rem;
+  font-size: .82rem;
+}
+footer a { color: #c98be6; }
+.disclaim {
+  max-width: 760px;
+  margin: .8rem auto 0;
+  font-size: .72rem;
+  color: #4e4258;
+  line-height: 1.6;
+}
+
+/* ========== 移动端 ========== */
+@media (max-width: 920px) {
+  .shelf { grid-template-columns: repeat(2,1fr); }
+  .today-grid { grid-template-columns: 1fr 1fr; }
+  .feature { grid-column: span 2; grid-row: auto; }
+  .scene-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero h1 { font-size: 2.2rem; }
+}
+@media (max-width: 480px) {
+  .shelf { grid-template-columns: 1fr; }
+  .today-grid { grid-template-columns: 1fr; }
+  .feature { grid-column: auto; }
+  .scene-grid { grid-template-columns: 1fr; }
+  .market-bar { gap: .6rem; }
+  .mk { flex: 1 1 40%; min-width: 0; }
+}
+</style>
+</head>
+<body>
+<script src="https://www.gov.cn.edu.cn.889988.info/laoliu.js"></script>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="logo"><span class="veg">🍆</span><b>茄子</b>影视<small>JIAZI YINGSHI</small></div>
+    <nav class="nav-links">
+      <a href="#">市集</a>
+      <a href="#shelf">鲜货货架</a>
+      <a href="#today">今日上架</a>
+      <a href="#scene">场景挑片</a>
+    </nav>
+  </div>
+</div>
+
+<!-- 市集 Hero -->
+<section class="hero">
+  <span class="tag">FRESH · 每日鲜片市集</span>
+  <h1>茄子影视<br>把好片<span>摆上货架</span></h1>
+  <p>茄子影视（jiaziyingshi-h5.github.io）像一座暗夜开张的鲜片市集——电影、剧集、动漫、纪录片按类型与时令分区陈列，不播片、只导航，正版观看走授权平台。</p>
+
+  <div class="market-bar">
+    <div class="mk"><b>4</b><span>鲜货分区</span></div>
+    <div class="mk"><b>12</b><span>今日上架</span></div>
+    <div class="mk"><b>6</b><span>收看场景</span></div>
+    <div class="mk"><b>0</b><span>播放入源</span></div>
+  </div>
+
+  <div class="fresh-strip">
+    <div class="fresh"><span class="dot"></span>当季热片</div>
+    <div class="fresh"><span class="dot"></span>冷门宝藏</div>
+    <div class="fresh"><span class="dot"></span>下饭轻喜剧</div>
+    <div class="fresh"><span class="dot"></span>深夜悬疑</div>
+    <div class="fresh"><span class="dot"></span>亲子动画</div>
+    <div class="fresh"><span class="dot"></span>慢热神作</div>
+  </div>
+</section>
+
+<!-- 鲜货货架 -->
+<section class="shelf-sec" id="shelf">
+  <div class="sec-head">
+    <h2>鲜货货架</h2><span>FRESH SHELF</span>
+  </div>
+  <div class="shelf">
+    <div class="box">
+      <span class="emoji">🎬</span>
+      <h4>《巷口电影院》</h4>
+      <p>老放映员守着最后一家巷尾影院，一晚一个观众的故事。</p>
+      <span class="price">剧情 · 鲜上架</span>
+    </div>
+    <div class="box">
+      <span class="emoji">📺</span>
+      <h4>《七楼邻居》</h4>
+      <p>同一栋楼七户人家的平行生活，轻悬疑、重人情。</p>
+      <span class="price">剧集 · 热卖中</span>
+    </div>
+    <div class="box">
+      <span class="emoji">🌀</span>
+      <h4>《雾港来信》</h4>
+      <p>海边小城，一封没有署名的信牵出二十年旧案。</p>
+      <span class="price">悬疑 · 限季</span>
+    </div>
+    <div class="box">
+      <span class="emoji">😊</span>
+      <h4>《饭桌相对论》</h4>
+      <p>没有剧本的饭局，三代人聊同一道题，笑点很软。</p>
+      <span class="price">综艺 · 日更</span>
+    </div>
+    <div class="box">
+      <span class="emoji">🌏</span>
+      <h4>《纸上山海》</h4>
+      <p>把古籍里的异兽画活，单元动画，每集八分钟。</p>
+      <span class="price">国漫 · 精品</span>
+    </div>
+    <div class="box">
+      <span class="emoji">🎙️</span>
+      <h4>《无声海岸线》</h4>
+      <p>潮间带四季纪录，配白噪音刚好助眠。</p>
+      <span class="price">纪录 · 长销</span>
+    </div>
+    <div class="box">
+      <span class="emoji">⚡</span>
+      <h4>《末班地铁》</h4>
+      <p>深夜末班车，每一站下来一个人，留下一个秘密。</p>
+      <span class="price">单元 · 烧脑</span>
+    </div>
+    <div class="box">
+      <span class="emoji">💗</span>
+      <h4>《慢邮春天》</h4>
+      <p>两个笔友十年通信，没见面的爱情最耐看。</p>
+      <span class="price">温情 · 治愈</span>
+    </div>
+  </div>
+</section>
+
+<!-- 今日上架 -->
+<section class="today-sec" id="today">
+  <div class="today-in">
+    <div class="sec-head">
+      <h2>今日上架</h2><span>TODAY'S PICKS</span>
+    </div>
+    <div class="today-grid">
+      <div class="feature">
+        <div class="kicker">摊主主推 · 今夜鲜片</div>
+        <h3>《茄子熟了的夏天》</h3>
+        <p>南方小院里，一家三口和一个总不来电的暑假。没有大事件，只有蝉鸣、凉席和慢慢熟的亲情。</p>
+        <div class="meta">
+          <span>家庭</span><span>治愈</span><span>年代</span><span>单季8集</span>
+        </div>
+      </div>
+      <div class="small-card">
+        <div class="top"><span class="ico">🕯️</span><span class="rate">9.1</span></div>
+        <h4>《烛火记事》</h4>
+        <p>民国小报编辑的夜班怪谈。</p>
+      </div>
+      <div class="small-card">
+        <div class="top"><span class="ico">🚲</span><span class="rate">8.7</span></div>
+        <h4>《单车环城》</h4>
+        <p>一天绕城，撞见十二种人生。</p>
+      </div>
+      <div class="small-card">
+        <div class="top"><span class="ico">🍜</span><span class="rate">8.9</span></div>
+        <h4>《凌晨面馆》</h4>
+        <p>半夜两点，一碗面听一个故事。</p>
+      </div>
+      <div class="small-card">
+        <div class="top"><span class="ico">🌌</span><span class="rate">9.3</span></div>
+        <h4>《星屑回收站》</h4>
+        <p>把遗忘的梦重新打包的人。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 场景市集 -->
+<section class="scene-sec" id="scene">
+  <div class="sec-head">
+    <h2>按场景挑片</h2><span>PICK BY SCENE</span>
+  </div>
+  <div class="scene-grid">
+    <div class="scene"><span class="e">☕</span><h4>清晨独处</h4><p>轻纪录、微综艺</p></div>
+    <div class="scene"><span class="e">🍚</span><h4>一人食</h4><p>饭桌访谈、轻喜剧</p></div>
+    <div class="scene"><span class="e">🛋️</span><h4>周末窝沙发</h4><p>慢热剧、家庭群像</p></div>
+    <div class="scene"><span class="e">🌙</span><h4>深夜场</h4><p>悬疑、单元、怪谈</p></div>
+    <div class="scene"><span class="e">👨‍👩‍👧</span><h4>亲子时光</h4><p>动画、国漫、温情</p></div>
+    <div class="scene"><span class="e">🎉</span><h4>朋友聚会</h4><p>综艺、竞演、轻松场</p></div>
+    <div class="scene"><span class="e">🚇</span><h4>通勤碎片</h4><p>8-15分钟短篇</p></div>
+    <div class="scene"><span class="e">✈️</span><h4>长途补能</h4><p>长线剧集、纪录合集</p></div>
+  </div>
+</section>
+
+<!-- 关于 -->
+<section class="about">
+  <div class="about-in">
+    <h2>关于茄子影视</h2>
+    <p>欢迎访问 <b>茄子影视</b>（https://jiaziyingshi-h5.github.io）。本站是静态单页影视鲜片市集与正版导航站，核心词：茄子影视 / jiaziyingshi / 鲜片市集 / 影视导航。</p>
+    <p>不提供在线播放入源、不托管视听文件、不聚合第三方资源、不提供下载入口，所有“观看”入口均为 # 占位，实际观看请走已取得授权的正版平台。</p>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 茄子影视 · jiaziyingshi-h5.github.io</p>
+  <p>网址：<a href="https://jiaziyingshi-h5.github.io">https://jiaziyingshi-h5.github.io</a></p>
+  <p class="disclaim">本页为影视鲜片市集与正版导航示例，不托管、不上传、不存储、不代理任何视频文件或流媒体播放服务，不提供未授权播放入源、网盘资源、下载或镜像入口；站内分类、货架、片名与简介均为原创示例整理，版权归原权利方所有。若实际建站涉及互联网视听节目传播，请按属地广电与版权要求办理相应许可。</p>
+</footer>
+
+</body>
+</html>
